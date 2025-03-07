@@ -1,0 +1,179 @@
+ropsik
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Формы и отзывы</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group input.error, .form-group textarea.error {
+            border-color: red;
+        }
+        .submit-button {
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .feedback-container {
+            margin-top: 30px;
+        }
+        .feedback {
+            margin: 15px 0;
+            padding: 10px;
+            background: #e7f1ff;
+            border-left: 3px solid #007bff;
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Контактная форма</h2>
+    <div class="form-group">
+        <label for="name">Имя <span style="color:red;">*</span></label>
+        <input type="text" id="name" required>
+    </div>
+    <div class="form-group">
+        <label for="email">Почта <span style="color:red;">*</span></label>
+        <input type="email" id="email" required>
+    </div>
+    <div class="form-group">
+        <label for="message">Сообщение <span style="color:red;">*</span></label>
+        <textarea id="message" required></textarea>
+    </div>
+    <button class="submit-button" id="submit">Отправить</button>
+</div>
+
+<div class="form-container">
+    <h2>Создание заказа</h2>
+    <div class="form-group">
+        <label for="orderName">Имя <span style="color:red;">*</span></label>
+        <input type="text" id="orderName" required>
+    </div>
+    <div class="form-group">
+        <input type="checkbox" id="agreement" required>
+        <label for="agreement">Я принимаю условия договора-оферты <span style="color:red;">*</span></label>
+    </div>
+    <button class="submit-button" id="createOrder">Создать заказ</button>
+</div>
+
+<div class="feedback-container" id="feedbackContainer">
+    <h2>Отзывы</h2>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+<script>
+    document.getElementById('submit').addEventListener('click', function() {
+        const name = document.getElementById('name');
+        const email = document.getElementById('email');
+        const message = document.getElementById('message');
+        
+        if (name.value.length < 3) {
+            name.classList.add('error');
+            alert('Имя должно содержать минимум 3 символа.');
+            return;
+        } else {
+            name.classList.remove('error');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value)) {
+            email.classList.add('error');
+            alert('Введите корректный адрес электронной почты.');
+            return;
+        } else {
+            email.classList.remove('error');
+        }
+
+        const requestData = {
+            name: name.value,
+            email: email.value,
+            message: message.value
+        };
+
+        fetch('http://127.0.0.1', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Успех:', data);
+        })
+        .catch((error) => {
+            console.error('Ошибка:', error);
+        });
+    });
+
+    document.getElementById('createOrder').addEventListener('click', function() {
+        const orderName = document.getElementById('orderName').value;
+        const agreement = document.getElementById('agreement').checked;
+
+        if (!agreement) {
+            alert('Вы должны принять условия договора-оферты.');
+            return;
+        }
+
+        swal.fire({
+            title: 'Создание заказа',
+            text: `Имя: ${orderName}`,
+            icon: 'success',
+        });
+    });
+
+    const feedbacks = [
+        { name: "Алексей", text: "Отличный сервис!" },
+        { name: "Мария", text: "Мне очень понравилось!" },
+        { name: "Сергей", text: "Рекомендую всем!" }
+    ];
+
+    const feedbackContainer = document.getElementById('feedbackContainer');
+    feedbacks.forEach(feedback => {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'feedback';
+        feedbackDiv.innerHTML = `<strong>${feedback.name}</strong>: ${feedback.text}`;
+        feedbackContainer.appendChild(feedbackDiv);
+    });
+</script>
+
+</body>
+</html>
